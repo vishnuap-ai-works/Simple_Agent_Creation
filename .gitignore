@@ -1,0 +1,48 @@
+# Virtual environments
+venv
+venv/
+**/venv
+**/venv/**
+env
+env/
+**/env
+**/env/**
+.venv
+.venv/
+**/.venv
+**/.venv/**
+.env
+.env/
+**/.env
+**/.env/**
+
+# Byte-compiled / optimized / DLL files
+__pycache__
+__pycache__/
+**/__pycache__
+**/__pycache__/**
+*.pyc
+**/*.pyc
+*.pyo
+**/*.pyo
+*.pyd
+**/*.pyd
+*$py.class
+**/*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Testing and coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+.nox/
+
+# macOS
+.DS_Store

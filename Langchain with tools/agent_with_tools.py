@@ -1,27 +1,27 @@
 from langchain_openai import ChatOpenAI
-from langchain_community.utilities import SerpAPIWrapper
+from langchain_community.utilities import SearchApiAPIWrapper
 from langchain_core.tools import Tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda
 from langchain.agents.factory import create_agent
+import os
+from langchain_core.globals import set_debug
+set_debug(True)
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
 
 
 # Connections to LLM & SerpAPI
 llm = ChatOpenAI(
-    model="",
-    base_url="",
-    api_key="",
+    model="gpt-5-mini",
+    base_url="https://openai.vocareum.com/v1",
+    api_key="voc-37886132717535051986986aa553a15c3682.30552167",
 )
 
-from langchain_community.utilities import serpapi
-class DummyHiddenPrints:
-    def __enter__(self): pass
-    def __exit__(self, *args): pass
-serpapi.HiddenPrints = DummyHiddenPrints
+import os
+os.environ["SEARCHAPI_API_KEY"] = "f31cASNCQt5XF1oEWoMb7zBj"
 
-search = SerpAPIWrapper(
-    serpapi_api_key=""
-)
+# Tool - 1
+search = SearchApiAPIWrapper()
 
 
 # Calculator Tool
@@ -53,7 +53,9 @@ user_prompt = ChatPromptTemplate.from_messages(
 agent = create_agent(
     model=llm,
     tools=tools,
-    system_prompt="""You are a research assistant. Use tools to find accurate information and answer clearly. If multiple questions are there, answer all of them.
+    system_prompt="""You are a research assistant. 
+    Use tools to find accurate information and answer clearly. 
+    If multiple questions are there, answer all of them.
 """,
 )
 
@@ -71,7 +73,8 @@ chain = user_prompt | RunnableLambda(run_agent)  # user_prompt -> run_agent
 
 result = chain.invoke(
     {
-        "input": "What is the square root of the number of countries in the world?, also give me the total population in world?."
+        "input": """What is the square root of the number of countries in the world?, 
+        also give me the total population in world?."""
     }
 )
 

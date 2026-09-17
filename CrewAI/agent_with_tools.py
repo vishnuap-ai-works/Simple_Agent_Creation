@@ -1,35 +1,28 @@
 import os
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import tool
 from serpapi import GoogleSearch
+from langchain_community.utilities import SearchApiAPIWrapper
+import os
+os.environ["SEARCHAPI_API_KEY"] = "f31cASNCQt5XF1oEWoMb7zBj"
 
 # Set up API keys in environment
-os.environ["OPENAI_API_KEY"] = ""
-os.environ["OPENAI_BASE_URL"] = ""
+os.environ["OPENAI_API_KEY"] = "voc-37886132717535051986986aa553a15c3682.30552167"
+os.environ["OPENAI_BASE_URL"] = "https://openai.vocareum.com/v1"
 os.environ["SERPAPI_API_KEY"] = ""
-os.environ["OPENAI_MODEL_NAME"] = ""
+os.environ["OPENAI_MODEL_NAME"] = "gpt-4o-mini"
+search = SearchApiAPIWrapper()
 
+llm = LLM(
+    model = "ollama/qwen2.5:7b",
+    base_url = 'http://localhost:11434'
+)
 
 @tool("Search Web")
 def search_web(query: str) -> str:
     """Useful for answering questions about current events or real-world facts."""
-    try:
-        search = GoogleSearch({
-            "q": query,
-            "api_key": os.environ["SERPAPI_API_KEY"]
-        })
-        results = search.get_dict()
-        if "answer_box" in results:
-            ans = results["answer_box"].get("answer") or results["answer_box"].get("snippet")
-            if ans:
-                return ans
-        
-        if "organic_results" in results and len(results["organic_results"]) > 0:
-            return results["organic_results"][0].get("snippet", "No snippet found")
-            
-        return "No good search result found"
-    except Exception as e:
-        return f"Search Error: {e}"
+    result = search.run(query)
+    return result
 
 
 @tool("Calculator")
@@ -44,9 +37,14 @@ def calculate(expression: str) -> str:
 research_assistant = Agent(
     role="Research Assistant",
     goal="Find accurate information and answer clearly.",
-    backstory="You are a research assistant. Use tools to find accurate information and answer clearly. If multiple questions are there, answer all of them.",
+    backstory="""You are a research assistant. 
+    Always Use search_web tool to find the current date, then with current date use tools 
+    find accurate information and answer clearly. 
+    If multiple questions are there, answer all of them.
+    """,
     verbose=True,
     allow_delegation=False,
+    llm = llm,
     tools=[search_web, calculate]
 )
 

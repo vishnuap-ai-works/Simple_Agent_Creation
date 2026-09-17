@@ -1,35 +1,27 @@
 import os
 import asyncio
-from agents import Agent, Runner, function_tool
+from agents import Agent, Runner, function_tool, enable_verbose_stdout_logging, set_tracing_disabled
 from serpapi import GoogleSearch
+from langchain_community.utilities import SearchApiAPIWrapper
 
+# Disable external tracing to remove the 401 errors
+set_tracing_disabled(True)
+
+# Enable verbose logging to see agent traces locally
+enable_verbose_stdout_logging()
 # Set up API keys in environment
-os.environ["OPENAI_API_KEY"] = ""
-os.environ["OPENAI_BASE_URL"] = ""
-os.environ["SERPAPI_API_KEY"] = ""
+os.environ["OPENAI_API_KEY"] = "voc-37886132717535051986986aa553a15c3682.30552167"
+os.environ["OPENAI_BASE_URL"] = "https://openai.vocareum.com/v1"
 
+
+import os
+os.environ["SEARCHAPI_API_KEY"] = "f31cASNCQt5XF1oEWoMb7zBj"
+search = SearchApiAPIWrapper()
 
 @function_tool
 def search_web(query: str) -> str:
-    """Useful for answering questions about current events or real-world facts."""
-    try:
-        search = GoogleSearch({
-            "q": query,
-            "api_key": os.environ["SERPAPI_API_KEY"]
-        })
-        results = search.get_dict()
-        if "answer_box" in results:
-            ans = results["answer_box"].get("answer") or results["answer_box"].get("snippet")
-            if ans:
-                return ans
-        
-        if "organic_results" in results and len(results["organic_results"]) > 0:
-            return results["organic_results"][0].get("snippet", "No snippet found")
-            
-        return "No good search result found"
-    except Exception as e:
-        return f"Search Error: {e}"
-
+    result = search.run(query)
+    return result
 
 # Calculator Tool
 @function_tool
@@ -44,7 +36,8 @@ def calculate(expression: str) -> str:
 agent = Agent(
     name="Research Assistant",
     model="gpt-4o-mini",
-    instructions="""You are a research assistant. Use tools to find accurate information and answer clearly. If multiple questions are there, answer all of them.""",
+    instructions="""You are a research assistant. Use tools to find accurate information and answer clearly. If multiple questions are there, answer all of them.
+    Ensure that the answer is precise and does not have any content that is not require. Just answer the question.""",
     tools=[search_web, calculate],
 )
 

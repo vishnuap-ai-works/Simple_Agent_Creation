@@ -1,0 +1,3 @@
+crewai==1.15.21
+langchain-community==0.4.2
+google-search-results

@@ -1,3 +1,4 @@
 crewai
 crewai-tools
 google-search-results==2.4.2
+langchain-community==0.4.2
